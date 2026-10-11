@@ -1,0 +1,19 @@
+node_modules/
+.expo/
+dist/
+.env*
+!.env.example
+mobile/android/
+mobile/ios/
+*.apk
+*.aab
+.DS_Store
+
+/server/dist/
+/mobile/.kotlin/
+/deliverables/*.apk
+
+# Local farmer data, uploads, device screenshots and build artifacts
+/server/storage/
+/deliverables/
+*.log

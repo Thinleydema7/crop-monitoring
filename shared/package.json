@@ -1,0 +1,5 @@
+{
+  "name": "@cropcare/shared",
+  "private": true,
+  "type": "module"
+}

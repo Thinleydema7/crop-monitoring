@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Yoesar · Officer desk</title>
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="login" class="login">
+      <div class="login-story">
+        <span class="eyebrow">CROPCARE / FIELD SUPPORT</span>
+        <h1>A new way<br />to grow.</h1>
+        <p>
+          Review field photographs, understand the location, and send practical
+          advice straight to the farmer.
+        </p>
+        <span class="story-bottom"
+          >A connected workspace for agricultural officers</span
+        >
+      </div>
+      <form id="login-form" class="login-card">
+        <span class="logo"><span class="brand-leaf"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 2 21 3 21 3s1 5.5-3.1 11.2A7 7 0 0 1 11 20Z M2 21c0-3 1.85-5.36 5.08-6.94C9.4 12.92 12.3 12 16 12"/></svg></span> Yoesar</span>
+        <h2>Officer sign in</h2>
+        <p>Sign in to review crop reports.</p>
+        <label
+          >Email<input
+            id="email"
+            type="email"
+            autocomplete="username"
+            value="officer@cropcare.test"
+            required /></label
+        ><label
+          >Password<input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            required /></label
+        ><button id="login-button">Sign in</button>
+        <p id="login-error" class="error" role="alert"></p>
+        <small>Demo officer: officer@cropcare.test / Officer123!</small>
+      </form>
+    </div>
+    <div id="desk" hidden>
+      <header>
+        <span class="logo"><span class="brand-leaf"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 2 21 3 21 3s1 5.5-3.1 11.2A7 7 0 0 1 11 20Z M2 21c0-3 1.85-5.36 5.08-6.94C9.4 12.92 12.3 12 16 12"/></svg></span> Yoesar <small>Officer desk</small></span>
+        <div>
+          <span id="officer-name"></span
+          ><button id="refresh" class="secondary">Refresh inbox</button
+          ><button id="logout" class="secondary">Sign out</button>
+        </div>
+      </header>
+      <main>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">FIELD REPORTS</span>
+            <h1>Report inbox</h1>
+            <p>Review each report and send the farmer a clear next step.</p>
+          </div>
+          <span class="demo-tag">Farmer reports & officer advice</span>
+        </div>
+        <div id="stats" class="stats"></div>
+        <div class="workspace">
+          <section class="inbox">
+            <div class="inbox-heading">
+              <h2>Report inbox</h2>
+              <span id="report-total"></span>
+            </div>
+            <div class="filters">
+              <input
+                id="search"
+                aria-label="Search reports"
+                placeholder="Search crop or report ID"
+              /><select id="status" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="pending">Pending review</option>
+                <option value="reviewed">Reviewed</option></select
+              ><select id="crop" aria-label="Filter by crop">
+                <option value="">All crops</option>
+                <option>Rice</option>
+                <option>Maize</option>
+                <option>Potato</option>
+                <option>Tomato</option>
+                <option>Apple</option>
+                <option>Chilli</option>
+              </select>
+            </div>
+            <p id="inbox-error" class="error" role="alert"></p>
+            <section class="map-panel" aria-labelledby="map-heading">
+              <div class="map-heading"><div><h3 id="map-heading">Reported crop locations</h3><p id="map-count" role="status">Loading reports…</p></div><button id="fit-reports" class="secondary">Show all pins</button></div>
+              <div id="reports-map" class="report-map" role="region" aria-label="Interactive map of reported crop locations"></div>
+              <p id="map-message" class="map-message" role="status"></p>
+              <div class="map-legend"><span><i class="pending-dot"></i>Pending review</span><span><i class="reviewed-dot"></i>Advice sent</span><small>Pins show reported locations, not confirmed disease.</small></div>
+            </section>
+            <div id="report-list"></div>
+          </section>
+          <section id="detail" class="detail" hidden>
+            <div class="empty">
+              <span>↗</span>
+              <h2>Select a field report</h2>
+              <p>
+                The photograph, location, and review history will appear here.
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="/vendor/leaflet/leaflet.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
