@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+import { MongoReportStore } from "./mongo-report.js";
+
 import express from "express";
 import cors from "cors";
 import path from "node:path";
@@ -11,7 +14,10 @@ export function createApp(
   webDirectory = path.resolve("../web"),
 ) {
   const app = express(),
-    store = new ReportStore(storageDirectory),
+    store =
+      mongoose.connection.readyState === 1
+        ? new MongoReportStore(storageDirectory)
+        : new ReportStore(storageDirectory),
     auth = createAuth(secret, storageDirectory),
     protect = requireAuth(secret, auth.findUserById);
   app.use(cors());

@@ -91,3 +91,8 @@ export class ReportStore {
     });
   }
 }
+
+export type ReportStoreLike = Pick<
+  ReportStore,
+  "directory" | "list" | "get" | "save" | "review"
+>;
