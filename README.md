@@ -32,9 +32,9 @@ Choose crop, gallery photo or camera frame, and automatic location. Reports save
 
 The dashboard offers crop/status/search filters, original and annotated photos, location/map details, diagnosis, recommendation, and append-only review history. Concurrent reviews use a version check. Refresh phone history to receive advice.
 
-## Detection status
+## On-device crop model
 
-The real model is still being trained. Camera sampling and optional gallery detections are clearly marked SIMULATED DEMO and must not be treated as disease findings. See shared/MODEL-CONTRACT.md for the adapter handoff. Capture retains the displayed sampled frame; the backend preserves the original upload and generates an annotated copy at matching dimensions. The camera unmounts when closed and pauses when the app backgrounds. Real high-rate frame processing and device performance validation remain pending the model runtime.
+The app bundles `mobile/assets/model/best.tflite` and uses the native TFLite runtime for local inference on gallery photos and sampled camera images. The adapter letterboxes each image, decodes YOLO26s output, applies NMS, and maps boxes back onto the original photo. See `shared/MODEL-CONTRACT.md` for model metadata and adapter assumptions. Results are screening aids that need officer review; no detections do not guarantee a healthy crop. Camera sampling is not high-rate frame processing, and a native development build is required after adding the runtime.
 
 ## Standalone preview APK
 

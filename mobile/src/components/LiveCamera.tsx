@@ -102,11 +102,11 @@ export default function LiveCamera({
     <Modal visible animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={s.page} edges={["top","bottom"]}>
       <ScrollView style={s.page} contentContainerStyle={s.content}>
-        <Text style={s.eyebrow}>CAMERA / SIMULATED DETECTION</Text>
+        <Text style={s.eyebrow}>CAMERA / ON-DEVICE MODEL</Text>
         <Text style={s.heading}>Look closer at your crop</Text>
         <Text style={s.text}>
-          The model is still training. This screen samples camera images and
-          draws simulated regions on the exact sampled frame.
+          This screen samples camera images and runs the crop disease model on
+          the exact displayed frame. Results are screening aids, not a diagnosis.
         </Text>
         {!permission ? (
           <Text style={s.text}>Checking camera permission…</Text>
@@ -151,7 +151,7 @@ export default function LiveCamera({
           </Text>
         )}
         <Button
-          title={running ? "Stop sampling" : "Start simulated detection"}
+          title={running ? "Stop sampling" : "Start on-device detection"}
           disabled={!permission?.granted || !ready || !foreground}
           onPress={() => {
             setError("");
@@ -160,7 +160,7 @@ export default function LiveCamera({
         />
         <Text style={s.label}>Confidence filter</Text>
         <View style={s.row}>
-          {[0.5, 0.6, 0.9].map((v) => (
+          {[0.25, 0.5, 0.6, 0.9].map((v) => (
             <Button
               key={v}
               secondary={threshold !== v}

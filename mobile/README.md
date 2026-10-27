@@ -1,6 +1,6 @@
 # CropCare Android — first checkpoint
 
-TypeScript Expo app. Use a development build for future native inference libraries.
+TypeScript Expo app with on-device TFLite crop screening. A development build is required for native inference.
 
 ## Run on an Android phone
 
@@ -37,6 +37,10 @@ npx eas-cli@latest build --platform android --profile preview
 An online backend is still needed for reporting and advice. Backend URLs and account setup will be added after inspecting the existing dashboard. Never use laptop localhost as a physical phone API URL.
 
 Official guidance: https://docs.expo.dev/develop/development-builds/introduction/ and https://docs.expo.dev/build-reference/apk/
+
+## On-device crop model
+
+The app bundles `assets/model/best.tflite` and uses `react-native-fast-tflite` for local inference on gallery photos and sampled camera images. The adapter resizes with letterboxing, decodes the YOLO26s output, applies NMS, and maps boxes to the original photo. Adding or replacing the model/runtime requires a native development build; restart Metro after the `.tflite` asset configuration changes. Results are screening aids that need officer review, and no detections do not guarantee a healthy crop. See `shared/MODEL-CONTRACT.md` for model metadata and adapter assumptions. Camera sampling is not high-rate frame processing.
 
 ## Java 21 builds
 

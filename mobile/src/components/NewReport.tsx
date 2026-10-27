@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Linking, Pressable, Switch, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { randomUUID } from "expo-crypto";
 import { CROPS, type Crop, type ReportLocation } from "../../../shared/report";
@@ -7,7 +7,6 @@ import { getReportLocation } from "../lib/location";
 import { preparePhoto } from "../lib/photos";
 import {
   analyzePhoto,
-  detectorMode,
   type AnalyzedPhoto,
 } from "../lib/detector";
 import { enqueue } from "../lib/offline";
@@ -36,8 +35,7 @@ export default function NewReport({
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
-    [camera, setCamera] = useState(false),
-    [simulation, setSimulation] = useState(false);
+    [camera, setCamera] = useState(false);
   useEffect(() => {
     if (step !== 3) return;
     let active = true;
@@ -76,11 +74,7 @@ export default function NewReport({
           a.height,
           "gallery",
         );
-        setPhoto(
-          simulation || detectorMode() === "model"
-            ? await analyzePhoto(prepared)
-            : { ...prepared, detections: [], detectionMode: "none" },
-        );
+        setPhoto(await analyzePhoto(prepared));
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to open photos.");
@@ -136,8 +130,7 @@ export default function NewReport({
         <Text style={s.badge}>{crop}</Text>
         {photo ? <><PhotoPreview photo={photo}/><Text style={s.small}>{photo.source==="camera"?"Exact sampled frame":"Selected image"} · {new Date(photo.capturedAt).toLocaleString()}</Text></> : <View style={{borderWidth:1,borderStyle:"dashed",borderColor:"#a8b8af",backgroundColor:"#eff6f1",borderRadius:18,padding:36,marginTop:20,alignItems:"center"}}><Text style={s.heading}>Your photo goes here</Text><Text style={[s.text,{textAlign:"center"}]}>Choose a photo or open the camera to get started.</Text></View>}
         <Button title={photo?"Choose another photo":"Choose from photos"} secondary busy={busy} onPress={()=>void gallery()}/>
-        <Button title="Open camera · simulated detection" secondary disabled={busy} onPress={()=>setCamera(true)}/>
-        <View style={[s.row,{alignItems:"center",marginTop:16,flexWrap:"nowrap"}]}><Switch value={simulation} disabled={busy} onValueChange={setSimulation}/><Text style={[s.small,{flex:1}]}>Demo boxes for the next gallery photo. These are simulated, not a diagnosis.</Text></View>
+        <Button title="Open camera · on-device detection" secondary disabled={busy} onPress={()=>setCamera(true)}/>
         <Button title="Continue to location" disabled={!photo||busy} onPress={()=>setStep(3)}/>
       </>}
       {step === 3 && <>

@@ -182,8 +182,8 @@ export default function Home({
       <View style={[s.row, { marginTop: 24, flexWrap: "nowrap" }]}>
         <Icon name="shield" size={18} />
         <Text style={[s.small, { flex: 1 }]}>
-          Photos and location are shared with authorized officers. Camera
-          detections are simulated while the model is being trained.
+          Photos and location are shared with authorized officers. On-device
+          model results are screening aids and need officer review.
         </Text>
       </View>
     </>

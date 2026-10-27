@@ -44,6 +44,7 @@
           "locationWhenInUsePermission": "Attach your automatic location to a crop report."
         }
       ],
+      "react-native-fast-tflite",
       "./plugins/local-backend.cjs",
       "expo-status-bar"
     ]

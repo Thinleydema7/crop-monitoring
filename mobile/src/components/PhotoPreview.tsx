@@ -30,17 +30,29 @@ export default function PhotoPreview({ photo }: { photo: AnalyzedPhoto }) {
               height: `${d.box.height * 100}%`,
               borderWidth: 2,
               borderColor: "#f5ca53",
+              backgroundColor: "transparent",
             }}
           >
             <Text
               style={{
-                backgroundColor: "#4c360d",
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                alignSelf: "flex-start",
+                width: 76,
+                height: 18,
+                overflow: "hidden",
+                backgroundColor: "transparent",
                 color: "#fff",
                 fontSize: 10,
-                padding: 3,
+                fontWeight: "700",
+                includeFontPadding: false,
+                textShadowColor: "rgba(0, 0, 0, 0.95)",
+                textShadowOffset: { width: 1, height: 1 },
+                textShadowRadius: 2,
               }}
             >
-              {d.label} {Math.round(d.confidence * 100)}%
+              {d.label === "diseased" ? "Diseased" : d.label} {Math.round(d.confidence * 100)}%
             </Text>
           </View>
         ))}
@@ -50,6 +62,13 @@ export default function PhotoPreview({ photo }: { photo: AnalyzedPhoto }) {
           <Text style={s.noticeText}>
             SIMULATED DEMO · These boxes are examples, not AI findings or a
             disease diagnosis.
+          </Text>
+        </View>
+      )}
+      {photo.detectionMode === "model" && (
+        <View style={s.notice}>
+          <Text style={s.noticeText}>
+            ON-DEVICE SCREENING · Model boxes are not a confirmed diagnosis. No boxes does not guarantee a healthy crop.
           </Text>
         </View>
       )}
