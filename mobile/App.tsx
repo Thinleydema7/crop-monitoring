@@ -42,7 +42,11 @@ import {
 import NewReport from "./src/components/NewReport";
 import ReportHistory from "./src/components/ReportHistory";
 import { Button, Card, s } from "./src/components/ui";
-export default function App() { return <SafeAreaProvider><AppContent /></SafeAreaProvider>; }
+
+export default function App() { 
+  return <SafeAreaProvider><AppContent /></SafeAreaProvider>; 
+}
+
 function AppContent() {
   const [session, setSession] = useState<Session | null>(null),
     [restoring, setRestoring] = useState(true),
@@ -65,6 +69,7 @@ function AppContent() {
   const currentSession = useRef<Session | null>(null),
     refreshing = useRef(false);
   currentSession.current = session;
+
   useEffect(() => {
     let active = true;
     void (async () => {
@@ -98,11 +103,12 @@ function AppContent() {
       active = false;
     };
   }, []);
+
   async function refresh(manual = false) {
     const activeSession = currentSession.current;
     if (
       !activeSession ||
-      activeSession.user.role !== "farmer" ||
+      activeSession?.user?.role !== "farmer" ||
       refreshing.current
     )
       return;
@@ -110,10 +116,10 @@ function AppContent() {
     setSyncing(true);
     if (manual) setError("");
     try {
-      if (manual) await retryQueued(activeSession.user.id);
+      if (manual && activeSession?.user?.id) await retryQueued(activeSession.user.id);
       await synchronize(activeSession);
       const fresh = await getReports(activeSession.token);
-      await cacheReports(activeSession.user.id, fresh);
+      if (activeSession?.user?.id) await cacheReports(activeSession.user.id, fresh);
       if (currentSession.current?.token === activeSession.token) {
         setReports(fresh);
         setNotice("Reports are up to date.");
@@ -131,17 +137,20 @@ function AppContent() {
       }
     } finally {
       try {
-        const drafts = await getQueued(activeSession.user.id);
-        if (currentSession.current?.token === activeSession.token)
-          setQueued(drafts);
+        if (activeSession?.user?.id) {
+          const drafts = await getQueued(activeSession.user.id);
+          if (currentSession.current?.token === activeSession.token)
+            setQueued(drafts);
+        }
       } finally {
         refreshing.current = false;
         setSyncing(false);
       }
     }
   }
+
   useEffect(() => {
-    if (!session || session.user.role !== "farmer") {
+    if (!session || session?.user?.role !== "farmer" || !session?.user?.id) {
       setReports([]);
       setQueued([]);
       return;
@@ -172,7 +181,18 @@ function AppContent() {
       appState.remove();
     };
   }, [session?.token]);
-  useEffect(() => { const listener = BackHandler.addEventListener("hardwareBackPress", () => { if (session && tab !== "home") { setTab("home"); return true; } return false; }); return () => listener.remove(); }, [session, tab]);
+
+  useEffect(() => { 
+    const listener = BackHandler.addEventListener("hardwareBackPress", () => { 
+      if (session && tab !== "home") { 
+        setTab("home"); 
+        return true; 
+      } 
+      return false; 
+    }); 
+    return () => listener.remove(); 
+  }, [session, tab]);
+
   async function signIn() {
     if (busy) return;
     setBusy(true);
@@ -200,6 +220,7 @@ function AppContent() {
       setBusy(false);
     }
   }
+
   async function signOut() {
     if (syncing) {
       setError("Wait for synchronization to finish before signing out.");
@@ -216,12 +237,13 @@ function AppContent() {
       setError("Unable to sign out. Please retry.");
     }
   }
+
   async function connection() {
     setBusy(true);
     setError("");
     try {
       await setAPIAddress(address);
-      await request("/health");
+      await request("/api/health");
       setNotice("Backend connection successful.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Connection failed.");
@@ -229,12 +251,14 @@ function AppContent() {
       setBusy(false);
     }
   }
+
   if (restoring)
     return (
       <View style={[s.page, { justifyContent: "center" }]}>
         <ActivityIndicator size="large" color="#245d44" />
       </View>
     );
+
   const settings = (
     <Card>
       <Text style={s.heading}>Connection settings</Text>
@@ -248,7 +272,7 @@ function AppContent() {
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="url"
-        placeholder="http://your-mac-ip:4000/api"
+        placeholder="http://10.73.176.163:4000"
       />
       <Button
         title="Check connection"
@@ -261,6 +285,7 @@ function AppContent() {
       </Text>
     </Card>
   );
+
   return (
     <SafeAreaView style={s.page} edges={["top", "bottom", "left", "right"]}>
     <KeyboardAvoidingView
@@ -369,8 +394,7 @@ function AppContent() {
           </>
         ) : (
           <>
-
-            {session.user.role === "officer" ? (
+            {session?.user?.role === "officer" ? (
               <Card>
                 <Text style={s.heading}>Your officer workspace</Text>
                 <Text style={s.text}>
@@ -381,7 +405,7 @@ function AppContent() {
             ) : (
               <>
                 {tab === "home" && <Home session={session} reports={reports} queued={queued.length} online={online} onStart={source=>{setEntry(source);setTab("report");}} onReports={()=>setTab("history")} />}
-                {tab === "settings" && <><Text style={s.title}>Your profile</Text><Card><View style={[s.row,{alignItems:"center",gap:14}]}><View style={{width:56,height:56,borderRadius:28,backgroundColor:"#1f513e",alignItems:"center",justifyContent:"center"}}><Icon name="user" color="white" size={28}/></View><View style={{flex:1}}><Text style={s.heading}>{session.user.name}</Text><Text style={s.small}>{session.user.email}</Text></View></View></Card><Button title="Camera & location permissions" secondary onPress={()=>void Linking.openSettings()} /><Text style={[s.small,{marginTop:12}]}>Manage permission access in your phone settings.</Text></>}
+                {tab === "settings" && <><Text style={s.title}>Your profile</Text><Card><View style={[s.row,{alignItems:"center",gap:14}]}><View style={{width:56,height:56,borderRadius:28,backgroundColor:"#1f513e",alignItems:"center",justifyContent:"center"}}><Icon name="user" color="white" size={28}/></View><View style={{flex:1}}><Text style={s.heading}>{session?.user?.name}</Text><Text style={s.small}>{session?.user?.email}</Text></View></View></Card><Button title="Camera & location permissions" secondary onPress={()=>void Linking.openSettings()} /><Text style={[s.small,{marginTop:12}]}>Manage permission access in your phone settings.</Text></>}
                 {tab === "report" && (
                   <NewReport
                     session={session}
@@ -406,7 +430,7 @@ function AppContent() {
                 {tab === "settings" && settings}
               </>
             )}
-            {(tab === "settings" || session.user.role === "officer") && <Button
+            {(tab === "settings" || session?.user?.role === "officer") && <Button
               title="Sign out"
               secondary
               disabled={syncing}
@@ -421,7 +445,7 @@ function AppContent() {
         )}
         {!!notice && <Text style={s.small}>{notice}</Text>}
       </ScrollView>
-      {session?.user.role === "farmer" && tab !== "report" && <View style={s.navigation}>
+      {session?.user?.role === "farmer" && tab !== "report" && <View style={s.navigation}>
         {(["home", "history", "settings"] as const).map(t => <Pressable key={t} accessibilityRole="tab" accessibilityState={{ selected: tab === t }} onPress={() => setTab(t)} style={[s.navItem, tab === t && { backgroundColor: "#eff6f1" }]}><Icon name={t === "home" ? "home" : t === "history" ? "report" : "user"} color={tab===t?"#28674c":"#7f8984"}/><Text style={[s.navText, tab === t && { color: "#28674c" }]}>{t === "home" ? "Home" : t === "history" ? "Reports" : "Profile"}</Text></Pressable>)}
       </View>}
     </KeyboardAvoidingView>

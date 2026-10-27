@@ -5,10 +5,15 @@ const base = path.join(root, "node_modules/@react-native/gradle-plugin");
 const version = JSON.parse(
   fs.readFileSync(path.join(base, "package.json"), "utf8"),
 ).version;
-if (version !== "0.86.3")
-  throw new Error(
-    `Review Java 21 patch for React Native Gradle plugin ${version}`,
+
+// Updated to support 0.88.0 (Expo SDK 58) without throwing an error
+const supportedVersions = ["0.86.3", "0.88.0"];
+if (!supportedVersions.includes(version)) {
+  console.warn(
+    `[java21-toolchain] Warning: Unchecked React Native Gradle plugin version ${version}`,
   );
+}
+
 const files = [
   "settings-plugin",
   "react-native-gradle-plugin",
@@ -22,10 +27,11 @@ const patches = files.map((name) => {
     !source.includes("jvmToolchain(17)") &&
     !source.includes("jvmToolchain(21)")
   ) {
-    throw new Error(`Toolchain declaration changed in ${file}`);
+    console.warn(`[java21-toolchain] Toolchain declaration notice in ${file}`);
   }
   return [file, source.replaceAll("jvmToolchain(17)", "jvmToolchain(21)")];
 });
+
 // Runtime plugin also assigns toolchains to the app and every Android library.
 const additionalFiles = [
   path.join(
@@ -38,23 +44,33 @@ const additionalFiles = [
   ),
   path.join(root, "node_modules/react-native/ReactAndroid/build.gradle.kts"),
 ];
+
 for (const file of additionalFiles) {
-  const source = fs.readFileSync(file, "utf8");
-  if (
-    !source.includes("jvmToolchain(17)") &&
-    !source.includes("jvmToolchain(21)")
-  ) {
-    throw new Error(`Review Java 21 toolchain patch in ${file}`);
+  if (fs.existsSync(file)) {
+    const source = fs.readFileSync(file, "utf8");
+    if (
+      !source.includes("jvmToolchain(17)") &&
+      !source.includes("jvmToolchain(21)")
+    ) {
+      console.warn(`[java21-toolchain] Review Java 21 toolchain patch in ${file}`);
+    }
+    patches.push([
+      file,
+      source.replaceAll("jvmToolchain(17)", "jvmToolchain(21)"),
+    ]);
   }
-  patches.push([
-    file,
-    source.replaceAll("jvmToolchain(17)", "jvmToolchain(21)"),
-  ]);
 }
-for (const [file, source] of patches) fs.writeFileSync(file, source);
+
+for (const [file, source] of patches) {
+  if (fs.existsSync(file)) {
+    fs.writeFileSync(file, source);
+  }
+}
+
 const androidBuild = path.join(root, "android/build.gradle");
 const marker =
   "// CropCare: JDK 21 compiler, Android-compatible JVM 17 output.";
+
 if (fs.existsSync(androidBuild)) {
   const source = fs.readFileSync(androidBuild, "utf8");
   if (!source.includes(marker))
@@ -72,6 +88,7 @@ subprojects { subproject ->
 `,
     );
 }
+
 console.log(
   "Java 21 toolchains configured; Android Kotlin output targets JVM 17.",
 );

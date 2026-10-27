@@ -44,7 +44,8 @@
           "locationWhenInUsePermission": "Attach your automatic location to a crop report."
         }
       ],
-      "./plugins/local-backend.cjs"
+      "./plugins/local-backend.cjs",
+      "expo-status-bar"
     ]
   }
 }

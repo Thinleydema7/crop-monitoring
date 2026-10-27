@@ -1,15 +1,24 @@
 import * as SecureStore from "expo-secure-store";
 import { fetch } from "expo/fetch";
 import type { Report } from "../../../shared/report";
+
 export type User = {
   id: string;
   name: string;
   email: string;
   role: "farmer" | "officer";
 };
+
 export type Session = { token: string; user: User };
-let configured = process.env.EXPO_PUBLIC_API_URL ?? "";
-export const apiBase = () => configured.replace(/\/$/, "");
+
+function normalizeBase(value: string) {
+  return value.trim().replace(/\/$/, "").replace(/\/api$/i, "");
+}
+
+let configured = normalizeBase(process.env.EXPO_PUBLIC_API_URL ?? "");
+
+export const apiBase = () => normalizeBase(configured);
+
 export class APIError extends Error {
   constructor(
     message: string,
@@ -18,10 +27,12 @@ export class APIError extends Error {
     super(message);
   }
 }
+
 export async function loadAPIAddress() {
   const saved = await SecureStore.getItemAsync("cropcare_api_address");
-  if (saved) configured = saved;
+  if (saved) configured = normalizeBase(saved);
 }
+
 export async function setAPIAddress(value: string) {
   const u = new URL(value.trim());
   if (
@@ -32,10 +43,11 @@ export async function setAPIAddress(value: string) {
     u.hash
   )
     throw new Error("Enter an http or https backend address.");
-  const address = value.trim().replace(/\/$/, "");
+  const address = normalizeBase(value);
   await SecureStore.setItemAsync("cropcare_api_address", address);
   configured = address;
 }
+
 export async function request<T>(
   route: string,
   token?: string,
@@ -79,20 +91,25 @@ export async function request<T>(
     clearTimeout(timeout);
   }
 }
+
 export const login = (email: string, password: string) =>
-  request<Session>("/auth/login", undefined, {
+  request<Session>("/api/auth/login", undefined, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email.trim(), password }),
   });
+
 export const getCurrentUser = async (token: string) =>
-  (await request<{ user: User }>("/auth/me", token)).user;
+  (await request<{ user: User }>("/api/auth/me", token)).user;
+
 export const getReports = async (token: string) =>
-  (await request<{ reports: Report[] }>("/reports", token)).reports;
+  (await request<{ reports: Report[] }>("/api/reports", token)).reports;
+
 export const getReportCount = async (token: string) =>
   (await getReports(token)).length;
+
 export const imageSource = (id: string, token: string, original = false) => ({
-  uri: `${apiBase()}/reports/${encodeURIComponent(id)}/${original ? "original" : "image"}`,
+  uri: `${apiBase()}/api/reports/${encodeURIComponent(id)}/${original ? "original" : "image"}`,
   headers: { Authorization: `Bearer ${token}` },
 });
 
@@ -102,7 +119,7 @@ export const register = (
   password: string,
   passwordConfirmation: string,
 ) =>
-  request<Session>("/auth/register", undefined, {
+  request<Session>("/api/auth/register", undefined, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

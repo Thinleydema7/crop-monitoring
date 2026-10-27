@@ -2,12 +2,14 @@ import { File } from "expo-file-system";
 import type { Crop, Report, ReportLocation } from "../../../shared/report";
 import type { AnalyzedPhoto } from "./detector";
 import { request } from "./api";
+
 export type Submission = {
   submissionId: string;
   crop: Crop;
   photo: AnalyzedPhoto;
   location: ReportLocation;
 };
+
 export async function uploadReport(
   submission: Submission,
   token: string,
@@ -21,8 +23,9 @@ export async function uploadReport(
   form.append("detections", JSON.stringify(submission.photo.detections));
   form.append("detectionMode", submission.photo.detectionMode);
   form.append("photo", new File(submission.photo.uri), "crop-photo.jpg");
+
   return (
-    await request<{ report: Report }>("/reports", token, {
+    await request<{ report: Report }>("/api/reports", token, {
       method: "POST",
       body: form,
     }, 60000)
